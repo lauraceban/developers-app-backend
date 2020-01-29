@@ -2,40 +2,39 @@ const express = require("express");
 const cors = require("cors");
 const serverlessHttp = require("serverless-http");
 const bodyParser = require("body-parser"); 
+const mysql = require("mysql");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password:  process.env.DB_PASSWORD,   
+  database: "developers"
+});
+
+
+
 //GET 
 app.get("/developers", function (request, response) {
   
-  response.status(200).json({
-    developers: [
-      {
-        name: "Ena",
-        available: true,
-        date_joined: "2020-01-09",
-        kills: "HTML, CSS, React, NodeJS, AWS, Git",
-        id: 1
-      },
-      {
-        name: "Sue",
-        available: true,
-        date_joined: "2020-01-10",
-        skills: "Agile, NodeJS, React, C#",
-        id: 2
-      },
-      {
-        name: "Sitara",
-        available: false,
-        date_joined: "2020-01-11",
-        skills: "Java, NodeJs, Git, TDD",
-        id: 3
-      }
-    ]
+  connection.query("SELECT * FROM Developers", function (err, data) {
+    if (err) {
+      response.status(500).json({
+        error: err
+      });
+    } else {
+      response.status(200).json({
+        developers: data
+      });
+    }
   });
 });
+
+
 
 //POST 
 app.post("/newDeveloper", function (request, response) {
@@ -48,16 +47,25 @@ app.post("/newDeveloper", function (request, response) {
 }); 
 
 
+
 //PUT 
 app.put("/developers/:id", function(request, response) {
-
+  
   const updatedDeveloper = request.body;
   const id = request.params.id;
- 
-  response.status(200).json({ 
-    message: `Successfully update developer ID ${id} with name: ${updatedDeveloper.name}, available: ${updatedDeveloper.available}, skills: ${updatedDeveloper.skills}`
+  
+
+  connection.query(`UPDATE Developers SET ? WHERE id=?`, 
+  [updatedDeveloper, id], 
+  function (err) {
+    if (err) {
+      response.status(500).json({error: err});
+    } else {
+      response.sendStatus(200);
+    }
   });
 });
+
 
 
 //DELETE 
@@ -71,5 +79,5 @@ app.delete("/developers/:id", function (request, response) {
 }); 
 
 
-module.exports.app = serverlessHttp(app);
 
+module.exports.app = serverlessHttp(app);
