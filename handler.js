@@ -71,10 +71,16 @@ app.put("/developers/:id", function(request, response) {
 //DELETE 
 app.delete("/developers/:id", function (request, response) {
 
-  const id = request.params.id;
+  const id = request.params.developerId;
  
-  response.status(200).json({
-      message: `You issued a delete request for ID: ${id}.`
+  connection.query(`DELETE FROM Developers WHERE developerId=?`, [id], function (err) {
+    if (err) {
+      response.status(500).json({
+        error: err
+      });
+    } else {
+      response.sendStatus(200);
+    }
   }); 
 }); 
 
