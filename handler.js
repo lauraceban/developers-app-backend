@@ -40,9 +40,14 @@ app.get("/developers", function (request, response) {
 app.post("/newDeveloper", function (request, response) {
 
   const newDeveloper = request.body;
- 
-  response.status(200).json({
-      message: `Received a request to add ${newDeveloper.name}, available ${newDeveloper.available}, joined ${newDeveloper.date_joined}. ${newDeveloper.name} has the following skills: ${newDeveloper.skills}.`
+
+  connection.query("INSERT INTO Developers SET ?", [newDeveloper], function (err, data) {
+    if (err) {
+      response.status(500).json({error: err});
+    } else {
+      newDeveloper.id = data.insertId;
+      response.status(201).json(newDeveloper);
+    }
   }); 
 }); 
 
@@ -55,9 +60,7 @@ app.put("/developers/:id", function(request, response) {
   const id = request.params.id;
   
 
-  connection.query(`UPDATE Developers SET ? WHERE id=?`, 
-  [updatedDeveloper, id], 
-  function (err) {
+  connection.query(`UPDATE Developers SET ? WHERE id=?`, [updatedDeveloper, id], function (err) {
     if (err) {
       response.status(500).json({error: err});
     } else {
