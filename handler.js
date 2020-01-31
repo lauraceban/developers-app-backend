@@ -12,20 +12,18 @@ app.use(bodyParser.json());
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-  password:  process.env.DB_PASSWORD,   
+  password: process.env.DB_PASSWORD,   
   database: "developers"
 });
 
 
 
 //GET 
-app.get("/developers", function (request, response) {
+app.get("/developers", function(request, response) {
   
-  connection.query("SELECT * FROM Developers", function (err, data) {
+  connection.query("SELECT * FROM Developers", function(err, data) {
     if (err) {
-      response.status(500).json({
-        error: err
-      });
+      response.status(500).json({error: err});
     } else {
       response.status(200).json({
         developers: data
@@ -37,7 +35,7 @@ app.get("/developers", function (request, response) {
 
 
 //POST 
-app.post("/newDeveloper", function (request, response) {
+app.post("/newDeveloper", function(request, response) {
 
   const newDeveloper = request.body;
 
@@ -57,10 +55,9 @@ app.post("/newDeveloper", function (request, response) {
 app.put("/developers/:id", function(request, response) {
   
   const updatedDeveloper = request.body;
-  const id = request.params.id;
+  const id = request.params.developerId;
   
-
-  connection.query(`UPDATE Developers SET ? WHERE id=?`, [updatedDeveloper, id], function (err) {
+  connection.query(`UPDATE Developers SET ? WHERE developerId=?`, [updatedDeveloper, id], function (err) {
     if (err) {
       response.status(500).json({error: err});
     } else {
@@ -72,15 +69,13 @@ app.put("/developers/:id", function(request, response) {
 
 
 //DELETE 
-app.delete("/developers/:id", function (request, response) {
+app.delete("/developers/:id", function(request, response) {
 
   const id = request.params.developerId;
  
   connection.query(`DELETE FROM Developers WHERE developerId=?`, [id], function (err) {
     if (err) {
-      response.status(500).json({
-        error: err
-      });
+      response.status(500).json({error: err});
     } else {
       response.sendStatus(200);
     }
