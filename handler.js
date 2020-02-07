@@ -19,14 +19,17 @@ const connection = mysql.createConnection({
 
 
 //GET 
-app.get("/developers", function(request, response) {
-  
+app.get("/developers", function(request, response) {  
   connection.query("SELECT * FROM Developers", function(err, data) {
     if (err) {
       response.status(500).json({error: err});
     } else {
+      const mapped = data.map(dev => {
+        dev.available = dev.available === 1 ? true : false;
+        return dev;
+      });
       response.status(200).json({
-        developers: data
+        developers: mapped
       });
     }
   });
@@ -44,6 +47,8 @@ app.post("/newDeveloper", function(request, response) {
       response.status(500).json({error: err});
     } else {
       newDeveloper.id = data.insertId;
+      // newDeveloper.available = newDeveloper.available === true ? 1 : 0;
+      newDeveloper.dateJoined = new Date(newDeveloper.dateJoined).toISOString();
       response.status(201).json(newDeveloper);
     }
   }); 
